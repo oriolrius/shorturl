@@ -1,0 +1,2 @@
+v.0.3 - small bug fixed
+* solved a problem with the shorturl URL formation
