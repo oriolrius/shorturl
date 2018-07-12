@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "name": "ShortURL https://url.joor.net (pygmy)",
-  "version": "0.3.1",
-    "description": "pygmy shorturl Chrome extension for https://url.joor.net",
+  "name": "your ShortURL service (pygmy)",
+  "version": "0.4",
+    "description": "pygmy shorturl Chrome extension",
   "icons": {
     "16": "icon.png"
   },
@@ -11,9 +11,14 @@
     "default_title": "Create short URLs",
     "default_popup": "popup.html"
   },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
   "permissions": [
     "tabs",
     "clipboardWrite",
-    "https://api.url.joor.net/"
+    "activeTab",
+    "storage"
   ]
 }

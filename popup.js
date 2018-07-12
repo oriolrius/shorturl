@@ -1,27 +1,21 @@
 var su = 'default value';
 
-// Make links open new tab window
-$(document).ready(function(){
-  $('body').on('click', 'a', function(){
-    chrome.tabs.create({url: $(this).attr('href')});
-    return false;
-  });
-});
-
-// Copy provided text to the clipboard.
-function copyTextToClipboard(text) {
-  var copyFrom = $('<textarea/>');
-  copyFrom.text(text);
-  $('body').append(copyFrom);
-  copyFrom.select();
-  document.execCommand('copy');
-  copyFrom.remove();
+function makeShort(tablink) {
+  chrome.storage.sync.get({ restUrl: 'https://api.url.joor.net'}, 
+    function(items) {
+      var rest_url = items.restUrl;
+      document.getElementById("backend").innerHTML = '\
+        Backend used: <a href="'+rest_url+'">'+rest_url+'</a><br />\
+        Change the backend using extension options.';
+      rest_query( tablink, rest_url);
+    }
+  );
 }
 
 // REST client query
-function makeShort(tablink) {
+function rest_query(tablink, rest_url) { 
   var xhr = new XMLHttpRequest();
-  xhr.open("POST", 'https://api.url.joor.net/api/shorten', true);
+  xhr.open("POST", rest_url + '/api/shorten', true);
   xhr.setRequestHeader("Content-Type", "application/json");
   var req = {name:"John Rambo", time:"2pm"};
   var req = {
@@ -39,8 +33,11 @@ function makeShort(tablink) {
     if (xhr.readyState == 4) {
       var jresponse = JSON.parse(xhr.responseText);
       su = jresponse.short_url; //+ '/' + jresponse.short_code;
-      var link = "<a href='"+su+"'>"+su+"</a>";
+      var link = "<a href=\""+su+"\">"+su+"</a>";
       document.getElementById("short-url").innerHTML = link;
+      document.getElementById("short-url").addEventListener('click', function() {
+        chrome.tabs.create({ url: su});
+      })
     }
   }
   xhr.send(data);
@@ -52,8 +49,17 @@ chrome.tabs.getSelected(null,function(tab) {
   document.getElementById("short").onclick = function() {
     makeShort(tablink);
   };
-  document.getElementById("cc").onclick = function() {
-    copyTextToClipboard(su);
-  }
+
+  var cc = new ClipboardJS('#cc');
+  cc.on('success', function(e) {
+    document.getElementById('status').innerHTML = '<br /><strong>Copied to clipboard.</strong><br /><br />';
+    setTimeout(function() {
+      document.getElementById('status').innerHTML = '';
+    }, 1500);
+  });
+  cc.on('error', function(e) {
+      console.error('Action:', e.action);
+      console.error('Trigger:', e.trigger);
+  });
 });
 
